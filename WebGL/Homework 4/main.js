@@ -28,14 +28,10 @@ let origin=new THREE.Vector3();
 let cameras={
 	perspective:new THREE.PerspectiveCamera(75,width/height,0.1,10000),
 	orthographic:new THREE.OrthographicCamera(width/-2,width/2,height/2,height/-2,1,10000),
-	//todo:add array of cameras
 };
 cameras.perspective.position.z = 200;
 cameras.orthographic.position.z = 200;
 let camera=cameras.perspective;
-
-//extra credit todo: add option for multiple views on the same canvas. We want the front/top/side view of the scene, and have a fourth user-controllable view. You can use ArrayCamera - see https://threejs.org/examples/webgl_camera_array.html (look at the code to see how to set up subcameras and resize their viewports; they will not work unless the viewports are set)
-//hint: using ArrayCamera can be tricky. You will need to set the initial camera positions and viewports, handle resize for them (note that you need to consider the device pixel ratio if dpr!=1, and an array camera's "type" is actually "PerspectiveCamera"), set the up property of sub-cameras because the default is the +y direction which is not necessarily desirable, and if you want to use the old controls for a sub camera, you need to set the control's targetwhen you switch, and manually update the camera's projection matrix in animate(). Also switching to/from array cameras would require changing the viewport(you can use resizeCanvas()). Finally you may need to set object.frustumCulled=false on *all* visible objects to avoid a disappearing problem with array cameras.
 
 
 let renderer = new THREE.WebGLRenderer({ canvas: canvas, context: context });
@@ -64,7 +60,6 @@ function resizeCanvas(forceResize=false) {//Some demos only detect window resizi
 resizeCanvas(true);
 
 let controls = new THREE.OrbitControls( camera, canvas );
-//note: you can change the target controlled object(camera)by setting control.target
 
 //*********************
 //Add lights and background
@@ -93,8 +88,6 @@ const groundMaterial = new THREE.MeshPhongMaterial({
 let ground = new THREE.Mesh( groundGeometry, groundMaterial );
 ground.receiveShadow=true;
 
-//extra credit todo: terrain
-//there are many ways to add realistic terrain and some vegetation to the scene. 
 
 ground.position.set( 0, 0, -1 );
 scene.add( ground );
@@ -110,13 +103,10 @@ scene.add( ground );
 //note that we can reuse geometries and materials, and only change the position and rotation of the object(mesh) to create multiple copies of something.
 
 //let's add some materials with textures! For more info see https://threejsfundamentals.org/threejs/lessons/threejs-textures.html
-//like in HW2, we can load a texture image using a data URL to avoid the need to set up a server for the webpage. See https://webgl2fundamentals.org/webgl/lessons/webgl-cors-permission.html about why, and https://onlinepngtools.com/convert-png-to-base64 for a tool to convert a picture to base64 encoding.
 
 
-
-//extra credit todo: textures
 //let's add some materials with textures! For more info see https://threejsfundamentals.org/threejs/lessons/threejs-textures.html
-//like in HW2, we can load a texture image using a data URL to avoid the need to set up a server for the webpage. See https://webgl2fundamentals.org/webgl/lessons/webgl-cors-permission.html about why, and https://onlinepngtools.com/convert-png-to-base64 for a tool to convert a picture to base64 encoding. The skeleton HTML file already includes a few encoded images but you can add your own. You don't have to use base64 encoding, and can also load an image normally from a server. Some public websites are configured to allow their images to be used in WebGL, and you can easily set up your local web server, for example by using Python: "python3 -m http.server" or "python -m SimpleHTTPServer" - see https://developer.mozilla.org/en-US/docs/Learn/Common_questions/set_up_a_local_testing_server
+//we can load a texture image using a data URL to avoid the need to set up a server for the webpage. See https://webgl2fundamentals.org/webgl/lessons/webgl-cors-permission.html about why, and https://onlinepngtools.com/convert-png-to-base64 for a tool to convert a picture to base64 encoding. The skeleton HTML file already includes a few encoded images but you can add your own. You don't have to use base64 encoding, and can also load an image normally from a server. Some public websites are configured to allow their images to be used in WebGL, and you can easily set up your local web server, for example by using Python: "python3 -m http.server" or "python -m SimpleHTTPServer" - see https://developer.mozilla.org/en-US/docs/Learn/Common_questions/set_up_a_local_testing_server
 let loader=new THREE.TextureLoader();
 
 //Here's an example of using an image texture. See https://threejs.org/docs/#api/en/textures/Texture 
@@ -140,7 +130,6 @@ let cannonBaseGeometry=new THREE.BoxBufferGeometry( 20, 40, 10 );
 let cannonSideGeometry=new THREE.BoxBufferGeometry( 4, 40, 15 );
 
 //this simple cannon tube is a truncated cone that ends in a sphere, and can be defined by a lathed shape. See https://threejs.org/docs/#api/en/geometries/LatheBufferGeometry
-//extra credit todo: load or even create your own better cannon model!
 let cannonTubePoints = [];
 let cannonEndRadius=5,cannonBodyOffset=15;//make the origin of the cannon body be in the middle, not at the end, so it rotates more realistically
 let cannonMainLength=35,cannonRadiusDiff=2,cannonOpeningLength=5,cannonOpeningRadiusDiff=1;
@@ -184,7 +173,6 @@ let cannon1=addCannon(new THREE.Vector3(150,0,5),new THREE.Quaternion().setFromA
 let cannon2=addCannon(new THREE.Vector3(-150,0,5),new THREE.Quaternion().setFromAxisAngle(up,-Math.PI/2));
 
 function rotateCannonsVertically(angle){//keeping them symmetrical. For a convenient UI it takes angles in degrees as input. Note that the axis is relative to the cannon base's frame and not the world's frame, since the body is a child object of the base, so the axis to rotate is actually its x axis.
-	//todo: to rotate cannon bodies, we need to set the rotation or quaternion of the cannon bodies. Note: the body's rotation is based on its parent(the base)'s frame, so the rotation needed to keep them symmetric is actually the same, not opposite.
 	cannon1.body.quaternion.setFromAxisAngle(right, (angle*Math.PI/180));
 	cannon2.body.quaternion.setFromAxisAngle(right, (angle*Math.PI/180));
 	//or
@@ -199,11 +187,6 @@ function rotateCannonsHorizontally(angle){//keeping them symmetrical. An angle o
 
 rotateCannonsVertically(30);//starting state
 
-
-
-
-//extra credit todo: add shadows for cannons and all other objects
-//You need to renderer.shadowMap.enabled = true; to enable shadows, and add a light that supports casting shadows in the scene , such as THREE.DirectionalLight (for a large scene you will need to set the frustrum of the shadow camera to be bigger - see https://threejs.org/docs/#api/en/lights/shadows/DirectionalLightShadow), and set castShadow=true on objects that you want to cast shadows from, and set receiveShadow=true on objects you want to receive shadows such as the ground, and the receiving object must have a suppirting material such as THREE.MeshStandardMaterial or THREE.MeshLambertMaterial.
 
 
 //*********************
@@ -248,8 +231,6 @@ let G=10;
 function physicsTick(dt){//Usually we should separate animation frames and physics ticks, so that we can pause physics, or adjust the time step size of physics, to keep physics running smoothly in real time, because the time between animation frames may not be constant.
 	for(let i=0;i<sphereList.length;i++){
 		let sphere=sphereList[i];
-		//todo: physics!
-		//todo 1. integrate velocity and gravity acceleration. in our case, velocity.z -= G*dt, position += velocity*dt 
 		//velocity.z -= G*dt;
 		//position += velocity*dt;
 		sphere.velocity.z -= G*dt;
@@ -277,7 +258,6 @@ function physicsTick(dt){//Usually we should separate animation frames and physi
 				//(and same for sphere2)
 				//sphere2.velocity.addScaledVector(projected, -1);
 
-				//extra credit todo: add support for different mass and/or inelastic collision	
 				
 			}
 		}
